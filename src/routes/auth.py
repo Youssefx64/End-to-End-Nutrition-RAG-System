@@ -13,7 +13,7 @@ auth_router = APIRouter(
     tags=["auth"],
 )
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "nutrition-rag-super-secret-key-change-in-production")
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or os.environ.get("jwt_secret_key", "nutrition-rag-super-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 

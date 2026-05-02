@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     PRIMARY_LANG: str = "en"
     DEFAULT_LANG: str = "en"
 
+    # Auth & security
+    JWT_SECRET_KEY: str = "nutrition-rag-super-secret-key-change-in-production"
+    ALLOWED_ORIGINS: str = "*"
+
     class Config:
         """
         This class defines the configuration for the settings.
