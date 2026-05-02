@@ -24,29 +24,33 @@ api.interceptors.response.use(
 )
 
 export const authApi = {
-  register: (data) => api.post('/auth/register', data),
-  login:    (data) => api.post('/auth/login', data),
-  me:       ()     => api.get('/auth/me'),
-  update:   (data) => api.put('/auth/me', data),
+  register: (data)         => api.post('/auth/register', data),
+  login:    (data)         => api.post('/auth/login', data),
+  me:       ()             => api.get('/auth/me'),
+  update:   (data)         => api.put('/auth/me', data),
 }
 
 export const dataApi = {
-  upload:  (projectId, file, onProgress) => {
-    const form = new FormData()
-    form.append('file', file)
-    return api.post(`/data/upload/${projectId}`, form, {
+  uploadFile: (projectId, formData, onProgress) =>
+    api.post(`/data/upload/${projectId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (e) => onProgress?.(Math.round((e.loaded * 100) / e.total)),
-    })
-  },
-  process: (projectId, body) => api.post(`/data/process/${projectId}`, body),
+    }),
+
+  processFile: (projectId, fileId, { chunkSize = 512, overlapSize = 50, doReset = 0 } = {}) =>
+    api.post(`/data/process/${projectId}`, {
+      file_id:      fileId,
+      chunk_size:   chunkSize,
+      overlap_size: overlapSize,
+      do_reset:     doReset,
+    }),
 }
 
 export const nlpApi = {
-  pushIndex:    (projectId, body) => api.post(`/nlp/index/push/${projectId}`, body),
-  getIndexInfo: (projectId)       => api.get(`/nlp/index/info/${projectId}`),
-  search:       (projectId, body) => api.post(`/nlp/index/search/${projectId}`, body),
-  answer:       (projectId, body) => api.post(`/nlp/index/answer/${projectId}`, body),
+  pushIndex:    (projectId, doReset = 0)   => api.post(`/nlp/index/push/${projectId}`, { do_reset: doReset }),
+  getIndexInfo: (projectId)                => api.get(`/nlp/index/info/${projectId}`),
+  search:       (projectId, body)          => api.post(`/nlp/index/search/${projectId}`, body),
+  answer:       (projectId, body)          => api.post(`/nlp/index/answer/${projectId}`, body),
 }
 
 export const baseApi = {
