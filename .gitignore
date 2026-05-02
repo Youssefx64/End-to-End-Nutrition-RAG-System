@@ -1,50 +1,115 @@
-# Python
+# ── Secrets & environment variables ────────────────────────────
+.env
+.env.*
+!.env.example
+src/.env
+src/.env.*
+!src/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+secret/
+
+# ── Python ──────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.so
 .Python
+*.egg
 *.egg-info/
 dist/
 build/
-*.egg
+eggs/
+parts/
+var/
+sdist/
+wheels/
+pip-wheel-metadata/
+MANIFEST
+
+# ── Virtual environments ────────────────────────────────────────
 .venv/
 venv/
 env/
+ENV/
+.virtualenv/
 
-# Environment
-src/.env
-.env
-*.env
-
-# Node
+# ── Node ────────────────────────────────────────────────────────
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
-node_modules/
+frontend/.cache/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Logs
+# ── Logs ────────────────────────────────────────────────────────
 *.log
 logs/
+log/
 
-# Database
+# ── Database & vector store ─────────────────────────────────────
 *.db
 *.sqlite
+*.sqlite3
 qdrant_db/
+qdrant_storage/
+pgdata/
 
-# IDE
+# ── Uploaded user data (never commit user files) ────────────────
+src/assets/*/
+uploads/
+data/
+
+# ── IDE & editors ───────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.project
+.classpath
+.settings/
 
-# OS
+# ── OS files ────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Uploads / assets (user data)
-src/assets/*/
+# ── Testing & coverage ──────────────────────────────────────────
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
 
-# Replit
+# ── Replit internals (not useful on GitHub) ─────────────────────
 .replit.nix
 .config/
+.upm/
+.cache/
+.local/
+replit.nix
+
+# ── Misc ────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.temp
+*.orig
+.mypy_cache/
+.dmypy.json
