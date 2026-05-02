@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "J23SOqkin_opv6y9ZkzCk"
+uri = "file://README.md"
+type = "text"
+title = "NutriAI — Professional README"
