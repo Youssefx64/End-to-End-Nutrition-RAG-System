@@ -1,8 +1,19 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "6JPVuVtPUoIEAmRo-RO1r"
+uri = "file://attached_assets/nutriai_logo.png"
+type = "image"
+title = "NutriAI neural leaf logo"
 
 [[outputs]]
 id = "J23SOqkin_opv6y9ZkzCk"
 uri = "file://README.md"
 type = "text"
 title = "NutriAI — Professional README"
+
+[[outputs]]
+id = "u8eEyfg_dzUNGxdZQdaRo"
+uri = "file://attached_assets/nutriai_logo.png"
+type = "image"
+title = "NutriAI Logo"

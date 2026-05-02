@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="https://img.shields.io/badge/-NutriAI-000000?style=for-the-badge&logo=leaf&logoColor=22c55e" height="60" alt="NutriAI" />
+<img src="assets/logo.png" width="120" height="120" alt="NutriAI Logo" />
 
 # NutriAI
 
