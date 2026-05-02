@@ -1,51 +1,80 @@
-# Nutrition RAG App
+# NutriAI — Full-Stack AI Nutrition Platform
 
-A FastAPI-based Retrieval-Augmented Generation (RAG) application for managing and querying nutrition information.
+A full-stack AI SaaS built on FastAPI (RAG backend) + React/Vite (frontend).
 
 ## Architecture
 
-- **Backend**: FastAPI (Python 3.12) running on port 5000
-- **Database**: PostgreSQL (Replit built-in) with pgvector extension for vector similarity search
-- **LLM Providers**: Cohere (default) or OpenAI for embeddings and text generation
+- **Frontend**: React 18 + Vite 5, runs on **port 5000** (webview)
+- **Backend**: FastAPI (Python 3.12), runs on **port 8000** (console)
+- **Proxy**: Vite proxies `/api/*` → `localhost:8000`
+- **Database**: PostgreSQL (Replit built-in) with pgvector for vector similarity search
+- **LLM Providers**: Cohere (default) or OpenAI for embeddings and generation
 - **Vector DB**: PGVector (PostgreSQL extension) or Qdrant
-- **File Processing**: Supports `.txt` and `.pdf` files (uses PyMuPDF for PDFs)
+- **Auth**: JWT (`python-jose`) + bcrypt password hashing, tokens in `localStorage`
+
+## Workflows
+
+| Workflow | Command | Port | Purpose |
+|---|---|---|---|
+| Start application | `cd frontend && npm run dev` | 5000 | React/Vite webview |
+| Backend API | `cd src && uvicorn main:app --host 0.0.0.0 --port 8000 --reload` | 8000 | FastAPI console |
 
 ## Project Structure
 
 ```
-src/
-├── main.py                    # FastAPI app entry point
-├── .env                       # Environment variables (see .env.example)
-├── requirements.txt           # Python dependencies
-├── routes/                    # API route handlers
-│   ├── base.py                # /api/v1/ health/info
-│   ├── data.py                # /api/v1/data/ file upload & processing
-│   └── nlp.py                 # /api/v1/nlp/ indexing, search, RAG answers
-├── controllers/               # Business logic
-│   ├── BaseController.py      # File path helpers
-│   ├── DataController.py      # File validation
-│   ├── ProjectController.py   # Project path management
-│   ├── ProcessController.py   # File loading & chunking (native Python, no langchain)
-│   └── NLPController.py       # Embedding, vector DB, RAG pipeline
-├── models/                    # Data models
-│   ├── db_schemas/            # SQLAlchemy ORM models (Project, Asset, DataChunk)
-│   └── enums/                 # Enum definitions
-├── stores/
-│   ├── llm/                   # LLM providers (OpenAI, Cohere)
-│   └── vectordb/              # Vector DB providers (PGVector, Qdrant)
-├── helpers/config.py          # Pydantic settings (reads from .env)
-└── utils/metrics.py           # Prometheus metrics middleware
+frontend/                          # React + Vite SaaS UI
+├── src/
+│   ├── App.jsx                    # Router + auth guards
+│   ├── index.css                  # Tailwind base + component classes
+│   ├── context/AuthContext.jsx    # JWT auth state (login/register/logout)
+│   ├── services/api.js            # Axios client with auth interceptor
+│   ├── components/Layout.jsx      # Sidebar + responsive shell
+│   └── pages/
+│       ├── Landing.jsx            # Public marketing page
+│       ├── Login.jsx              # Sign-in form
+│       ├── Register.jsx           # Sign-up form
+│       ├── Dashboard.jsx          # Knowledge base stats + quick actions
+│       ├── Chat.jsx               # RAG-powered AI chat
+│       ├── Documents.jsx          # Upload + process + index documents
+│       └── Profile.jsx            # Account management
+├── vite.config.js                 # Proxy /api/* → localhost:8000
+├── tailwind.config.js             # Dark green theme (brand-600 = #16a34a)
+└── package.json
+
+src/                               # FastAPI backend (UNCHANGED CORE LOGIC)
+├── main.py                        # FastAPI app, CORS, startup, routers
+├── routes/
+│   ├── auth.py                    # JWT auth: /register /login /me (NEW)
+│   ├── base.py                    # GET /api/v1/
+│   ├── data.py                    # File upload & chunking
+│   └── nlp.py                     # Indexing, search, RAG answers
+├── models/db_schemas/nutrition_rag/schemas/
+│   ├── user.py                    # User SQLAlchemy model (NEW)
+│   ├── project.py
+│   ├── asset.py
+│   └── data_chunk.py
+├── controllers/                   # Core RAG logic (UNTOUCHED)
+│   ├── ProcessController.py       # File loading & chunking (langchain)
+│   └── NLPController.py           # Embedding, vector DB, RAG pipeline
+└── helpers/config.py              # Pydantic settings
 ```
 
 ## API Endpoints
 
-- `GET /api/v1/` — App info
-- `POST /api/v1/data/upload/{project_id}` — Upload a file
-- `POST /api/v1/data/process/{project_id}` — Chunk the uploaded file
-- `POST /api/v1/nlp/index/push/{project_id}` — Embed & index chunks into vector DB
-- `GET /api/v1/nlp/index/info/{project_id}` — Get index info
+### Auth (new)
+- `POST /api/v1/auth/register` — Create account, returns JWT
+- `POST /api/v1/auth/login` — Sign in, returns JWT
+- `GET  /api/v1/auth/me` — Get current user (requires Bearer token)
+- `PUT  /api/v1/auth/me` — Update profile (requires Bearer token)
+
+### RAG Core (unchanged)
+- `GET  /api/v1/` — App info
+- `POST /api/v1/data/upload/{project_id}` — Upload file
+- `POST /api/v1/data/process/{project_id}` — Chunk uploaded file
+- `POST /api/v1/nlp/index/push/{project_id}` — Embed & index chunks
+- `GET  /api/v1/nlp/index/info/{project_id}` — Index info
 - `POST /api/v1/nlp/index/search/{project_id}` — Semantic search
-- `POST /api/v1/nlp/index/answer/{project_id}` — RAG-based Q&A
+- `POST /api/v1/nlp/index/answer/{project_id}` — RAG Q&A
 
 ## Environment Variables
 
@@ -53,28 +82,30 @@ Key variables in `src/.env`:
 
 | Variable | Description |
 |---|---|
-| `POSTGRES_*` | PostgreSQL connection details (auto-populated from Replit DB) |
+| `POSTGRES_*` | PostgreSQL connection (auto-populated from Replit DB) |
 | `COHERE_API_KEY` | Cohere API key (required for default LLM/embedding) |
 | `OPENAI_API_KEY` | OpenAI API key (if using OpenAI backend) |
 | `GENERATION_BACKEND` | `COHERE` or `OPENAI` |
 | `EMBEDDING_BACKEND` | `COHERE` or `OPENAI` |
 | `VECTOR_DB_BACKEND` | `PGVECTOR` or `QDRANT` |
+| `JWT_SECRET_KEY` | Secret for signing JWTs (defaults to dev key) |
+
+## Frontend Tech Stack
+
+- React 18 + React Router 6
+- Vite 5 (dev server + proxy)
+- Tailwind CSS 3 (dark surface theme, brand green `#16a34a`)
+- Framer Motion (page transitions, animations)
+- Lucide React (icons)
+- Axios (HTTP client with JWT interceptor)
+- React Hot Toast (notifications)
+- React Dropzone (file upload)
+- React Markdown (chat message rendering)
 
 ## Setup Notes
 
-- PostgreSQL is Replit's built-in DB (`heliumdb` on host `helium`)
-- The `pgvector` extension is enabled automatically at app startup
-- SQLAlchemy tables are created automatically on startup
-- `ProcessController.py` uses native Python + PyMuPDF (no langchain dependency) to avoid pydantic v1/v2 compatibility issues with langsmith
-
-## Running
-
-```bash
-cd src && uvicorn main:app --host 0.0.0.0 --port 5000 --reload
-```
-
-## API Keys Required
-
-To use LLM features, add your API key:
-- Cohere: Set `COHERE_API_KEY` in `src/.env`
-- OpenAI: Set `OPENAI_API_KEY` in `src/.env`
+- PostgreSQL is Replit's built-in DB
+- pgvector extension is enabled automatically at startup
+- All SQLAlchemy tables (including `users`) are auto-created on startup
+- `ProcessController.py` uses langchain 0.3.x (Python 3.12 compatible)
+- bcrypt is used directly (not via passlib) for Python 3.12 compatibility

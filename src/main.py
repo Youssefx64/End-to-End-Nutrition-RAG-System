@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from routes import base, data, nlp
+from routes.auth import auth_router
 from helpers.config import get_settings
 from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
@@ -10,6 +12,15 @@ from utils.metrics import setup_metrics
 
 # Create a FastAPI application
 app = FastAPI()
+
+# Setup CORS to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Setup Prometheus metrics
 setup_metrics(app)
@@ -34,6 +45,10 @@ async def startup_span():
         # import the Base where models register their metadata
         from models.db_schemas.nutrition_rag.schemas.nutrition_rag_base import (
             SQLAlchemyBase,
+        )
+        # Import all models so they register with SQLAlchemyBase
+        from models.db_schemas.nutrition_rag.schemas import (
+            Project, Asset, DataChunk, User
         )
 
         # create missing tables (runs in sync on the async engine)
@@ -89,3 +104,4 @@ async def shutdown_span():
 app.include_router(base.base_router)
 app.include_router(data.data_router)
 app.include_router(nlp.nlp_router)
+app.include_router(auth_router)
